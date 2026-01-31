@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>ML Sentiment Analyzer</h2>
+
+    <div class="input-section">
+        <input id="sentence" type="text" placeholder="Type a sentence...">
+        <button id="predictBtn">Predict</button>
+        <button id="metricsBtn">Get Metrics</button>
+    </div>
+
+    <h3>Predictions:</h3>
+    <div id="predictionResult"></div>
+
+    <h3>Metrics & Top Words:</h3>
+    <pre id="metricsResult"></pre>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

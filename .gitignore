@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+
+# Compiled C++ binaries
+*.dll
+*.exe
+*.obj
+*.so
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Large dataset (let user download)
+data.csv
