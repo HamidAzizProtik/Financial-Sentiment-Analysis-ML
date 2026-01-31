@@ -10,8 +10,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import ctypes
 
+# Get the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 # load C++ DLL
-cpp = ctypes.CDLL("./text_preprocess.dll")
+cpp = ctypes.CDLL(os.path.join(script_dir, '..', 'cpp', 'text_preprocess.dll'))
 
 # define function
 cpp.preprocess_text.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
@@ -19,9 +22,9 @@ cpp.preprocess_text.restype = None
 
 
 # Change working directory to script location
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(script_dir)
 
-data = pd.read_csv('data.csv')
+data = pd.read_csv(os.path.join(script_dir, '..', '..', 'data', 'data.csv'))
 
 # processing text data
 def preprocess_text(sentence):
