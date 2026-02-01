@@ -1,28 +1,34 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-// Get the directory where this script is located
-const scriptDir = path.dirname(__filename);
-console.log('Script directory:', scriptDir);
+let mainWindow;
 
 function createWindow() {
-    const win = new BrowserWindow({
-        width: 750,
-        height: 600,
-        webPreferences: {
-            preload: path.join(scriptDir, 'renderer.js'),
-            nodeIntegration: true,
-            contextIsolation: false
-        }
-    });
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    minWidth: 1000,
+    minHeight: 700,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js')
+    },
+  });
 
-    const htmlPath = path.join(scriptDir, '..', '..', 'frontend', 'index.html');
-    console.log('Loading HTML from:', htmlPath);
-    win.loadFile(htmlPath);
+  mainWindow.loadFile('frontend/index.html');
 }
 
-app.whenReady().then(createWindow);
+app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
+  }
 });

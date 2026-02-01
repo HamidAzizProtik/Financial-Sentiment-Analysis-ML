@@ -1,25 +1,490 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Sentiment Analyzer</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Analytics - ML Sentiment Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
 </head>
 <body>
-    <h2>ML Sentiment Analyzer</h2>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a10 10 0 0 1 10 10"/>
+              <path d="M12 2a10 10 0 0 0-10 10"/>
+              <path d="M2 12h10"/>
+              <path d="M2 12a10 10 0 0 0 10 10"/>
+              <path d="M22 12a10 10 0 0 1-10 10"/>
+              <path d="M12 22V12"/>
+            </svg>
+          </div>
+          <div>
+            <h2>Neural Analytics</h2>
+            <p>ML Intelligence v2.0</p>
+          </div>
+        </div>
+      </div>
 
-    <div class="input-section">
-        <input id="sentence" type="text" placeholder="Type a sentence...">
-        <button id="predictBtn">Predict</button>
-        <button id="metricsBtn">Get Metrics</button>
-    </div>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-page="overview">
+          <span class="nav-icon">◆</span>
+          <span>Overview</span>
+        </a>
+        <a href="#" class="nav-item" data-page="chat">
+          <span class="nav-icon">◇</span>
+          <span>Analyzer</span>
+        </a>
+        <a href="#" class="nav-item" data-page="models">
+          <span class="nav-icon">◈</span>
+          <span>Model Deep</span>
+        </a>
+        <a href="#" class="nav-item" data-page="features">
+          <span class="nav-icon">▣</span>
+          <span>Features</span>
+        </a>
+        <a href="#" class="nav-item" data-page="data">
+          <span class="nav-icon">▢</span>
+          <span>Data View</span>
+        </a>
+      </nav>
 
-    <h3>Predictions:</h3>
-    <div id="predictionResult"></div>
+      <div class="sidebar-footer">
+        <div class="status-card">
+          <div class="status-header">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Connecting...</span>
+          </div>
+          <div class="status-info">
+            <div class="info-row">
+              <span class="info-label">Latency</span>
+              <span class="info-value" id="latency-value">--ms</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Uptime</span>
+              <span class="info-value" id="uptime-value">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-    <h3>Metrics & Top Words:</h3>
-    <pre id="metricsResult"></pre>
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <h1 id="page-title">Market Intelligence</h1>
+          <span class="header-subtitle">Real-time sentiment analysis dashboard</span>
+        </div>
+        <div class="header-right">
+          <div class="metric-pill" id="best-model-pill">
+            <span class="pill-label">Best Model</span>
+            <span class="pill-value">Logistic Reg</span>
+          </div>
+          <div class="metric-pill accent">
+            <span class="pill-label">Accuracy</span>
+            <span class="pill-value" id="header-accuracy">--%</span>
+          </div>
+        </div>
+      </header>
 
-    <script src="../src/js/renderer.js"></script>
+      <div class="content-area">
+        
+        <!-- overview page -->
+        <div id="overview-page" class="page active">
+          <!-- Hero Stats -->
+          <div class="hero-stats">
+            <div class="stat-card large">
+              <div class="stat-glow"></div>
+              <div class="stat-content">
+                <span class="stat-label">Dominant Sentiment</span>
+                <span class="stat-value" id="dominant-sentiment">--</span>
+                <span class="stat-sub" id="sentiment-percent">--% confidence</span>
+              </div>
+              <div class="stat-chart" id="mini-gauge"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon positive">↗</div>
+              <div class="stat-content">
+                <span class="stat-label">Positive</span>
+                <span class="stat-value" id="stat-positive">--%</span>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill positive" id="bar-positive" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon neutral">→</div>
+              <div class="stat-content">
+                <span class="stat-label">Neutral</span>
+                <span class="stat-value" id="stat-neutral">--%</span>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill neutral" id="bar-neutral" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon negative">↘</div>
+              <div class="stat-content">
+                <span class="stat-label">Negative</span>
+                <span class="stat-value" id="stat-negative">--%</span>
+                <div class="stat-bar">
+                  <div class="stat-bar-fill negative" id="bar-negative" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Grid -->
+          <div class="dashboard-grid">
+            <!-- Sentiment Distribution -->
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Sentiment Landscape</h3>
+                  <div class="card-actions">
+                    <span class="card-badge">Live</span>
+                  </div>
+                </div>
+                <div class="card-body split-view">
+                  <div class="view-left">
+                    <canvas id="sentimentPolar"></canvas>
+                  </div>
+                  <div class="view-right">
+                    <canvas id="sentimentBars"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Model Radar -->
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Model Comparison</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="modelRadar"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prediction Breakdown -->
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Prediction Probability</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="predictionBreakdown"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Words -->
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Top Feature Words</h3>
+                  <div class="card-tabs">
+                    <button class="tab-btn active" data-tab="positive">Positive</button>
+                    <button class="tab-btn" data-tab="negative">Negative</button>
+                    <button class="tab-btn" data-tab="neutral">Neutral</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <canvas id="wordCloudChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confusion Matrix -->
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Confusion Matrix</h3>
+                </div>
+                <div class="card-body centered">
+                  <canvas id="confusionHeatmap"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Model Agreement -->
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Model Agreement</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="agreementGauge"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Accuracy Trend -->
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Performance Metrics</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="metricsGrouped"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- chat page -->
+        <div id="chat-page" class="page">
+          <div class="chat-layout">
+            <div class="chat-main">
+              <div class="chat-container">
+                <div class="chat-header">
+                  <div class="chat-title">
+                    <h3>Sentiment Analyzer</h3>
+                    <span class="chat-sub">Type financial text for analysis</span>
+                  </div>
+                  <div class="chat-actions">
+                    <button class="action-btn" id="clear-chat">Clear</button>
+                  </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                  <div class="chat-message bot">
+                    <div class="message-avatar">🧠</div>
+                    <div class="message-content">
+                      <p>Neural Analytics ready. Enter any financial text or sentiment for analysis.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="chat-input-area">
+                  <input type="text" id="chat-input" class="chat-input" placeholder="Type your analysis request..." autocomplete="off">
+                  <button id="send-btn" class="send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 2L11 13"/>
+                      <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-sidebar">
+              <div class="sidebar-section">
+                <h4>Current Prediction</h4>
+                <div class="prediction-display" id="current-prediction">
+                  <div class="pred-main">
+                    <span class="pred-sentiment">--</span>
+                    <span class="pred-confidence">--%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sidebar-section">
+                <h4>Model Predictions</h4>
+                <div class="model-predictions">
+                  <div class="model-row">
+                    <span class="model-name">Naive Bayes</span>
+                    <div class="model-bar-wrap">
+                      <div class="model-bar-fill nb" id="nb-bar" style="width: 0%"></div>
+                    </div>
+                    <span class="model-result" id="nb-pred">--</span>
+                  </div>
+                  <div class="model-row">
+                    <span class="model-name">Logistic Reg</span>
+                    <div class="model-bar-wrap">
+                      <div class="model-bar-fill lr" id="lr-bar" style="width: 0%"></div>
+                    </div>
+                    <span class="model-result" id="lr-pred">--</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sidebar-section">
+                <h4>Confidence Meter</h4>
+                <div class="confidence-meter">
+                  <div class="meter-fill" id="confidence-fill" style="height: 0%"></div>
+                  <div class="meter-labels">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- models page -->
+        <div id="models-page" class="page">
+          <div class="dashboard-grid">
+            <div class="grid-item large">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Model Performance Comparison</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="detailedComparison"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>F1 Score by Class</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="f1ByClass"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Precision vs Recall</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="precisionRecall"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Classification Reports</h3>
+                </div>
+                <div class="card-body">
+                  <table class="report-table" id="classification-table">
+                    <thead>
+                      <tr>
+                        <th>Model</th>
+                        <th>Class</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                        <th>Support</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- features page -->
+        <div id="features-page" class="page">
+          <div class="dashboard-grid">
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Feature Weight Distribution</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="weightHistogram"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Top Coefficients</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="topCoeffs"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>TF-IDF Sparsity</h3>
+                </div>
+                <div class="card-body centered">
+                  <canvas id="sparsityDonut"></canvas>
+                  <div class="sparsity-stats">
+                    <div class="stat-mini">
+                      <span class="stat-num" id="sparsity-val">--%</span>
+                      <span class="stat-desc">Zero Values</span>
+                    </div>
+                    <div class="stat-mini">
+                      <span class="stat-num" id="vocab-val">--</span>
+                      <span class="stat-desc">Vocabulary</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Feature Importance Heatmap</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="featureHeatmap"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- data page -->
+        <div id="data-page" class="page">
+          <div class="dashboard-grid">
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Dataset Distribution</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="datasetDist"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Prediction Accuracy</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="accuracyStacked"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="grid-item wide">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Sample Predictions</h3>
+                  <input type="text" class="table-search" placeholder="Search..." id="table-search">
+                </div>
+                <div class="card-body scrollable">
+                  <table class="data-table" id="predictions-table">
+                    <thead>
+                      <tr>
+                        <th>Sentence</th>
+                        <th>True</th>
+                        <th>NB</th>
+                        <th>LR</th>
+                        <th>Match</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../src/js/renderer.js"></script>
 </body>
 </html>
