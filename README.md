@@ -3,7 +3,7 @@
 
 A **full-stack desktop application** which analyzes financial data using machine learning and serves it in a sleek and interactive UI. This project combines Python ML with an API, text preprocessing with C++ and an Electron frontend to deliver a tool capable of understanding financial sentiment. Models are evaluated using accuracy and classification reports.
 
-![home](screenshots\Recording 2026-02-02 112851.mp4)
+![home](screenshots/Recording 2026-02-02 112851.mp4)
 
 ## 📦 What this application features
 ### This project builds a complete workflow from the ground up:
